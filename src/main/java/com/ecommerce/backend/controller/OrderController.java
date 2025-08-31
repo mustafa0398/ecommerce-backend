@@ -36,7 +36,6 @@ public class OrderController {
             for (OrderItem item : order.getItems()) {
                 item.setOrder(order);
 
-                // ✅ Product aus DB laden und setzen
                 if (item.getProduct() != null && item.getProduct().getId() != null) {
                     Product product = productRepo.findById(item.getProduct().getId())
                             .orElseThrow(() -> new RuntimeException("Product not found: " + item.getProduct().getId()));

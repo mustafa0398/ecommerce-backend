@@ -24,14 +24,21 @@ public class AuthController {
     public String register(@RequestBody User user) {
         System.out.println("Register-Request erhalten: " + user.getEmail());
 
+        if (user.getEmail() == null || !user.getEmail().matches("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$")) {
+            return "Ungültige E-Mail-Adresse";
+        }
+
+        if (user.getPassword() == null || user.getPassword().length() < 8) {
+            return "Passwort muss mindestens 8 Zeichen lang sein";
+        }
+
         if (repo.findByEmail(user.getEmail()).isPresent()) {
             return "User already exists";
         }
+
         user.setPassword(encoder.encode(user.getPassword()));
 
-        if (user.getRole() == null || user.getRole().isBlank()) {
-            user.setRole("USER");
-        }
+        user.setRole("USER");
 
         User saved = repo.save(user);
         System.out.println("User gespeichert mit ID: " + saved.getId());
@@ -39,11 +46,12 @@ public class AuthController {
         return "User registered";
     }
 
+
     @PostMapping("/login")
     public String login(@RequestBody User user) {
         return repo.findByEmail(user.getEmail())
                 .filter(u -> encoder.matches(user.getPassword(), u.getPassword()))
-                .map(u -> jwtUtil.generateToken(u.getEmail(), u.getRole())) // 🚀 Email + Rolle
+                .map(u -> jwtUtil.generateToken(u.getEmail(), u.getRole())) 
                 .orElse("Invalid credentials");
     }
 }
