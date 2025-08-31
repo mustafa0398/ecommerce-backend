@@ -2,6 +2,9 @@ package com.ecommerce.backend.controller;
 
 import com.ecommerce.backend.model.User;
 import com.ecommerce.backend.repository.UserRepository;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import com.ecommerce.backend.security.JwtUtil;
@@ -21,30 +24,28 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public String register(@RequestBody User user) {
+    public ResponseEntity<String> register(@RequestBody User user) {
         System.out.println("Register-Request erhalten: " + user.getEmail());
 
         if (user.getEmail() == null || !user.getEmail().matches("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$")) {
-            return "Ungültige E-Mail-Adresse";
+            return ResponseEntity.badRequest().body("Ungültige E-Mail-Adresse");
         }
 
         if (user.getPassword() == null || user.getPassword().length() < 8) {
-            return "Passwort muss mindestens 8 Zeichen lang sein";
+            return ResponseEntity.badRequest().body("Passwort muss mindestens 8 Zeichen lang sein");
         }
 
         if (repo.findByEmail(user.getEmail()).isPresent()) {
-            return "User already exists";
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("User already exists");
         }
 
         user.setPassword(encoder.encode(user.getPassword()));
-
         user.setRole("USER");
 
-        User saved = repo.save(user);
-        System.out.println("User gespeichert mit ID: " + saved.getId());
-
-        return "User registered";
+        repo.save(user);
+        return ResponseEntity.ok("User registered");
     }
+
 
 
     @PostMapping("/login")
