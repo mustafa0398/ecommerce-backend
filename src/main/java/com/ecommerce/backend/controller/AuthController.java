@@ -1,0 +1,49 @@
+package com.ecommerce.backend.controller;
+
+import com.ecommerce.backend.model.User;
+import com.ecommerce.backend.repository.UserRepository;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.web.bind.annotation.*;
+import com.ecommerce.backend.security.JwtUtil;
+
+@RestController
+@RequestMapping("/api/auth")
+@CrossOrigin(origins = "http://localhost:5173")
+public class AuthController {
+
+    private final UserRepository repo;
+    private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+    private final JwtUtil jwtUtil;
+
+    public AuthController(UserRepository repo, JwtUtil jwtUtil) {
+        this.repo = repo;
+        this.jwtUtil = jwtUtil;
+    }
+
+    @PostMapping("/register")
+    public String register(@RequestBody User user) {
+        System.out.println("Register-Request erhalten: " + user.getEmail());
+
+        if (repo.findByEmail(user.getEmail()).isPresent()) {
+            return "User already exists";
+        }
+        user.setPassword(encoder.encode(user.getPassword()));
+
+        if (user.getRole() == null || user.getRole().isBlank()) {
+            user.setRole("USER");
+        }
+
+        User saved = repo.save(user);
+        System.out.println("User gespeichert mit ID: " + saved.getId());
+
+        return "User registered";
+    }
+
+    @PostMapping("/login")
+    public String login(@RequestBody User user) {
+        return repo.findByEmail(user.getEmail())
+                .filter(u -> encoder.matches(user.getPassword(), u.getPassword()))
+                .map(u -> jwtUtil.generateToken(u.getEmail(), u.getRole())) // 🚀 Email + Rolle
+                .orElse("Invalid credentials");
+    }
+}
