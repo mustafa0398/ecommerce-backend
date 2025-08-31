@@ -28,6 +28,7 @@ public class SecurityConfig {
                 .requestMatchers("/h2-console/**").permitAll()
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/products/**").permitAll()
+                .requestMatchers("/api/upload/**").permitAll() 
                 .requestMatchers("/api/orders/**").hasAnyRole("USER", "ADMIN") 
                 .requestMatchers("/api/admin/**").hasAuthority("ROLE_ADMIN")
                 .requestMatchers("/", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
