@@ -18,7 +18,7 @@ import com.ecommerce.backend.repository.ProductRepository;
 
 @RestController
 @RequestMapping("/api/admin/products")
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(origins = {"http://localhost:5173", "https://ecommerce-frontend-lemon-five-79.vercel.app"})
 public class AdminProductController {
 
     private final ProductRepository repo;
