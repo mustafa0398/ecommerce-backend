@@ -23,6 +23,8 @@ Thumbs.db
 application-*.yml
 application-*.properties
 .env
+src/main/resources/application.properties
+
 
 # Backup files
 *.swp
